@@ -1,5 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+
+def get_current_time_in_ms():
+    return time.time()*1000
 
 def load_data(path):
     def one_hot(y):
@@ -73,10 +77,8 @@ class NeuralNetwork:
         self.a3 = self.softmax(self.z3)
         self.error = self.a3 - self.y
 
-        
     def backprop(self):
         dcost = (1/self.batch)*self.error
-        
         DW3 = np.dot(dcost.T,self.a2).T
         DW2 = np.dot((np.dot((dcost),self.W3.T) * self.dReLU(self.z2)).T,self.a1).T
         DW1 = np.dot((np.dot(np.dot((dcost),self.W3.T)*self.dReLU(self.z2),self.W2.T)*self.dReLU(self.z1)).T,self.x).T
@@ -100,7 +102,7 @@ class NeuralNetwork:
         self.b3 = self.b3 - self.lr * db3
         self.b2 = self.b2 - self.lr * db2
         self.b1 = self.b1 - self.lr * db1
-        print(np.mean(DW3))
+        
 
     def train(self):
         for epoch in range(self.epochs):
@@ -144,4 +146,4 @@ class NeuralNetwork:
 NN = NeuralNetwork(X_train, y_train) 
 NN.train()
 # NN.plot()
-# NN.test(X_test,y_test)
+NN.test(X_test,y_test)
