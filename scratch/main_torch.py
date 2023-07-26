@@ -54,6 +54,7 @@ def train(model, device, train_loader, optimizer, epoch):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
+        print(target)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -94,7 +95,7 @@ dataset2 = datasets.MNIST('../data', train=False,transform=transform)
 train_loader = torch.utils.data.DataLoader(dataset1,batch_size=64)
 test_loader = torch.utils.data.DataLoader(dataset2, batch_size=1000)
 
-model = NetLinear().to(device)
+model = Net().to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 scheduler = StepLR(optimizer, step_size=1, gamma=0.7)

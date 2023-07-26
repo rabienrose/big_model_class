@@ -6,6 +6,9 @@ __pycache__/
 .DS_Store
 # C extensions
 *.so
+*.pt
+*.bmp
+data
 
 # Distribution / packaging
 .Python

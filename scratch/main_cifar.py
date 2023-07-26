@@ -6,6 +6,108 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
 
+#get a vgg16 model from torchvision
+
+class VGG16(nn.Module):
+    def __init__(self, num_classes=10):
+        super(VGG16, self).__init__()
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU())
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(), 
+            nn.MaxPool2d(kernel_size = 2, stride = 2))
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU())
+        self.layer4 = nn.Sequential(
+            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2))
+        self.layer5 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU())
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU())
+        self.layer7 = nn.Sequential(
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2))
+        # self.layer8 = nn.Sequential(
+        #     nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+        #     nn.BatchNorm2d(512),
+        #     nn.ReLU())
+        # self.layer9 = nn.Sequential(
+        #     nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+        #     nn.BatchNorm2d(512),
+        #     nn.ReLU())
+        # self.layer10 = nn.Sequential(
+        #     nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+        #     nn.BatchNorm2d(512),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(kernel_size = 2, stride = 2))
+        # self.layer11 = nn.Sequential(
+        #     nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+        #     nn.BatchNorm2d(512),
+        #     nn.ReLU())
+        # self.layer12 = nn.Sequential(
+        #     nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+        #     nn.BatchNorm2d(512),
+        #     nn.ReLU())
+        # self.layer13 = nn.Sequential(
+        #     nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+        #     nn.BatchNorm2d(512),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(kernel_size = 2, stride = 2))
+        self.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(8*8*256, 4096),
+            nn.ReLU())
+        self.fc1 = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(4096, 256),
+            nn.ReLU())
+        self.fc2= nn.Sequential(
+            nn.Linear(256, num_classes))
+        
+    def forward(self, x):
+        out = self.layer1(x)
+        out = self.layer2(out)
+        out = self.layer3(out)
+        out = self.layer4(out)
+        out = self.layer5(out)
+        out = self.layer6(out)
+        # out = self.layer7(out)
+        # print(out.shape)
+        # out = self.layer8(out)
+        # print(out.shape)
+        # out = self.layer9(out)
+        # print(out.shape)
+        # out = self.layer10(out)
+        # print(out.shape)
+        # out = self.layer11(out)
+        # print(out.shape)
+        # out = self.layer12(out)
+        # print(out.shape)
+        # out = self.layer13(out)
+        # print(out.shape)
+        out = out.reshape(out.size(0), -1)
+        out = self.fc(out)
+        out = self.fc1(out)
+        out = self.fc2(out)
+        out = F.log_softmax(out, dim=1)
+        return out
+
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -90,7 +192,7 @@ dataset_cifar2 = datasets.CIFAR10('../data', train=False, download=True,transfor
 train_loader = torch.utils.data.DataLoader(dataset_cifar1,batch_size=64)
 test_loader = torch.utils.data.DataLoader(dataset_cifar2, batch_size=1000)
 
-model = Net().to(device)
+model = VGG16().to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 scheduler = StepLR(optimizer, step_size=1, gamma=0.7)
